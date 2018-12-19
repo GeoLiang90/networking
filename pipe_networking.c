@@ -26,9 +26,10 @@ int server_handshake(int *to_client) {
   read(up_pipe,s,HANDSHAKE_BUFFER_SIZE);
 
 
-  if (strcmp(s,ACK)== 0){
+  if (s){
     printf("Client message successfully received\n");
-    *to_client = open("DP",O_WRONLY);
+
+    *to_client = open(s,O_WRONLY);
 
     if (*to_client < 0){
       perror("Error opening downpipe from client to write\n");
@@ -66,9 +67,9 @@ int client_handshake(int *to_server) {
     perror("Error opening up to WKP \n");
   }
 
-  printf("Now writing ACK to the WKP \n");
+  printf("Now writing DP (My pipe name) to the WKP \n");
 
-  write(comm, ACK, sizeof(ACK));
+  write(comm, "DP", sizeof("DP"));
 
   *to_server = comm;
 
@@ -88,10 +89,15 @@ int client_handshake(int *to_server) {
 
   read(dcomm,s,HANDSHAKE_BUFFER_SIZE);
   if (strcmp(s,ACK) == 0){
-    "Successfully received info from server \n";
+    printf("Successfully received info from server \n");
   }
-  printf("Replying to server and finishing\n");
+  else{
+    printf("Not ackowledged by server");
+    return -1;
+  }
+
   char * g = "Got message";
   write(comm,g, sizeof(g));
+  printf("Replying to server and finishing\n");
   return dcomm;
 }
